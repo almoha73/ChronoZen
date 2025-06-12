@@ -29,7 +29,7 @@ const PomodoroController: React.FC = () => {
   const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
   const lastAiCallTimeRef = useRef<number>(0);
 
-  const [pomodoroCycle, setPomodoroCycle] = useState<number>(0); 
+  const [pomodoroCycle, setPomodoroCycle] = useState<number>(0);
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>(null);
 
   const [workMinutes, setWorkMinutes] = useState<string>("25");
@@ -79,7 +79,7 @@ const PomodoroController: React.FC = () => {
         navigator.vibrate(200);
       }
 
-      if (pomodoroPhase) { // pomodoroMode is implied if pomodoroPhase is not null
+      if (pomodoroPhase) {
         const currentShortBreakDuration = getPomodoroShortBreakDuration();
         const currentLongBreakDuration = getPomodoroLongBreakDuration();
         const currentWorkDuration = getPomodoroWorkDuration();
@@ -91,7 +91,7 @@ const PomodoroController: React.FC = () => {
             setCurrentTime(currentShortBreakDuration);
             toast({ title: "ChronoZen Pomodoro", description: `Pause courte (${currentShortBreakDuration / 60} min). Cycle ${pomodoroCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK}.` });
             setTimerState("running");
-          } else { 
+          } else {
             setPomodoroPhase("long-break");
             setInitialTime(currentLongBreakDuration);
             setCurrentTime(currentLongBreakDuration);
@@ -109,9 +109,8 @@ const PomodoroController: React.FC = () => {
         } else if (pomodoroPhase === "long-break") {
           toast({ title: "ChronoZen Pomodoro", description: `Session Pomodoro terminée ! Bravo !` });
           resetPomodoroState();
-          // Timer remains idle, ready for new Pomodoro or manual start
         }
-      } else { // Should not happen if pomodoroPhase is managed correctly
+      } else {
         toast({ title: "ChronoZen", description: "C'est terminé !" });
         setTimerState("idle");
       }
@@ -136,24 +135,17 @@ const PomodoroController: React.FC = () => {
   };
 
   const handleControlClick = () => {
-    if (!pomodoroPhase && timerState === "idle") { // Not in pomodoro, simple start for current duration
+    if (!pomodoroPhase && timerState === "idle") { 
         if (currentTime === 0 || currentTime < initialTime ) {
-            setCurrentTime(initialTime); // Reset to initial if at 0 or partially run
+            setCurrentTime(initialTime); 
         }
         setTimerState("running");
         return;
     }
     
-    // Pomodoro logic
-    if (timerState === "idle" && pomodoroPhase) { // Pomodoro was paused and finished, or reset
-      // This case means pomodoro finished and reset or user wants to restart a phase
-      if (currentTime === 0) { // If a phase finished
-         // Let useEffect handle next phase or end of session. If it's truly idle, user might want to restart current phase.
-         // For now, if pomodoroPhase is set and timer is 0 and idle, this means session ended.
-         // Let handleStartPomodoro re-initiate a new session.
-         // This button should ideally be "Start New Pomodoro Session" or similar if session ended.
-         // For simplicity, let's assume it restarts the current displayed time if pomodoroPhase is set.
-         setCurrentTime(initialTime); // Reset to the current phase's initial time
+    if (timerState === "idle" && pomodoroPhase) { 
+      if (currentTime === 0) { 
+         setCurrentTime(initialTime); 
       }
       setTimerState("running");
 
@@ -167,15 +159,11 @@ const PomodoroController: React.FC = () => {
 
   const getControlIcon = () => {
     if (timerState === "running") return <Pause className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
-    // If pomodoro session ended and timer is idle (currentTime is 0 after long break)
     if (pomodoroPhase === "long-break" && currentTime === 0 && timerState === "idle") {
-        return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />; // Indicates session done, can reset for new Pomodoro
+        return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />; 
     }
-    // If a phase just ended (currentTime is 0) but useEffect will transition it to running for next phase, show play
-    // If it's paused or idle (and not end of session)
     if (timerState === "idle" || timerState === "paused") {
         if (currentTime === 0 || (currentTime < initialTime && initialTime > 0 && pomodoroPhase)) {
-             // If a phase is set and timer ran down or was reset manually
             return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
         }
     }
@@ -213,7 +201,7 @@ const PomodoroController: React.FC = () => {
             {pomodoroPhase && currentTime === 0 && timerState === "idle" ? 'Démarrer Nouvelle Session' : 'Démarrer Session Pomodoro'}
           </Button>
 
-          <div className="grid grid-cols-3 gap-x-2 gap-y-3 w-full pt-2">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-3 w-full pt-2">
             <div>
               <Label htmlFor="workDuration" className="text-xs text-muted-foreground">Travail (min)</Label>
               <Input 
@@ -271,7 +259,7 @@ const PomodoroController: React.FC = () => {
           onClick={handleControlClick}
           className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
           aria-label={getAriaLabelForControl()}
-           disabled={pomodoroPhase === null && timerState === 'idle' && currentTime !== initialTime} // Disable if no pomodoro started and timer is not at initial state
+           disabled={pomodoroPhase === null && timerState === 'idle' && currentTime !== initialTime} 
         >
           {getControlIcon()}
         </Button>

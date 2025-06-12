@@ -1,97 +1,98 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 50 56% 90%; /* Light Beige/Cream - Lighter for background */
-    --foreground: 57 29% 20%; /* Dark Olive Green - Darker for text */
+    --background: 204 10% 96%; /* #F0F4F8 Light Gray */
+    --foreground: 210 10% 23%; /* Dark Blueish Gray for text */
 
-    --card: 50 56% 76%; /* Light Beige/Cream from image #E0D6A3 */
-    --card-foreground: 57 29% 20%;
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 210 10% 23%;
 
-    --popover: 50 56% 76%;
-    --popover-foreground: 57 29% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 10% 23%;
 
-    --primary: 285 59% 46%; /* Medium Purple from image #9B30BA */
+    --primary: 197 71% 53%; /* #29ABE2 Saturated Blue */
     --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 57 29% 60%; /* Lighter Olive */
-    --secondary-foreground: 57 29% 20%;
+    --secondary: 204 10% 85%; /* Lighter gray for secondary elements */
+    --secondary-foreground: 210 10% 23%;
 
-    --muted: 57 29% 70%; /* Even lighter Olive */
-    --muted-foreground: 57 29% 35%;
+    --muted: 204 10% 75%; /* Even lighter gray for muted text */
+    --muted-foreground: 210 10% 45%;
 
-    --accent: 300 70% 30%; /* Dark Purple from image #5F0F5F, slightly brightened */
+    --accent: 28 100% 60%; /* #FF9933 Warm Orange */
     --accent-foreground: 0 0% 100%; /* White */
 
-    --destructive: 0 84.2% 60.2%; /* Standard red */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 57 29% 50%; /* Olive for borders */
-    --input: 50 56% 80%; /* Lighter beige for inputs */
-    --ring: 285 59% 46%; /* Primary purple for rings */
+    --border: 204 10% 88%; /* Light gray for borders */
+    --input: 204 10% 92%; /* Slightly off-white for inputs */
+    --ring: 197 71% 53%; /* Primary blue for rings */
 
-    --chart-1: 285 59% 50%;
-    --chart-2: 300 70% 40%;
-    --chart-3: 50 56% 60%;
-    --chart-4: 57 29% 45%;
-    --chart-5: 285 40% 65%;
+    --chart-1: 197 71% 53%;
+    --chart-2: 28 100% 60%;
+    --chart-3: 197 50% 70%;
+    --chart-4: 28 80% 75%;
+    --chart-5: 197 30% 80%;
     --radius: 0.5rem;
 
-    --sidebar-background: 50 60% 97%;
-    --sidebar-foreground: 57 29% 30%;
-    --sidebar-primary: 285 59% 40%;
+    --sidebar-background: 204 10% 92%;
+    --sidebar-foreground: 210 10% 23%;
+    --sidebar-primary: 197 71% 48%; /* Slightly darker blue for sidebar primary */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 50 56% 85%;
-    --sidebar-accent-foreground: 57 29% 25%;
-    --sidebar-border: 50 50% 80%;
-    --sidebar-ring: 285 59% 46%;
+    --sidebar-accent: 28 100% 65%; /* Slightly lighter orange for sidebar accent */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 204 10% 85%;
+    --sidebar-ring: 197 71% 53%;
   }
 
   .dark {
-    --background: 300 30% 12%; /* Very Dark Purple/Gray */
-    --foreground: 50 40% 88%; /* Light Beige/Cream for text */
+    --background: 210 10% 15%; /* Dark Blueish Gray */
+    --foreground: 204 10% 90%; /* Light Gray for text */
 
-    --card: 300 25% 18%;
-    --card-foreground: 50 40% 88%;
+    --card: 210 10% 20%; /* Darker card background */
+    --card-foreground: 204 10% 90%;
 
-    --popover: 300 25% 18%;
-    --popover-foreground: 50 40% 88%;
+    --popover: 210 10% 20%;
+    --popover-foreground: 204 10% 90%;
 
-    --primary: 285 65% 55%; /* Bright Purple, slightly lightened */
+    --primary: 197 71% 53%; /* #29ABE2 Saturated Blue (can remain same or be slightly brighter) */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 300 20% 25%;
-    --secondary-foreground: 50 40% 88%;
+    --secondary: 210 10% 30%; /* Mid-dark gray */
+    --secondary-foreground: 204 10% 90%;
 
-    --muted: 300 15% 30%;
-    --muted-foreground: 50 30% 70%;
+    --muted: 210 10% 40%; /* Lighter-dark gray */
+    --muted-foreground: 204 10% 70%;
 
-    --accent: 50 60% 70%; /* Light Beige as accent in dark mode */
-    --accent-foreground: 300 30% 15%; /* Dark text for light accent */
+    --accent: 28 100% 60%; /* #FF9933 Warm Orange (can remain same or be slightly brighter) */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 300 20% 28%;
-    --input: 300 20% 28%;
-    --ring: 285 65% 60%;
+    --border: 210 10% 25%;
+    --input: 210 10% 25%;
+    --ring: 197 71% 58%; /* Brighter blue for rings in dark mode */
     
-    --chart-1: 285 65% 60%;
-    --chart-2: 300 70% 50%;
-    --chart-3: 50 60% 70%;
-    --chart-4: 57 35% 55%;
-    --chart-5: 285 50% 70%;
+    --chart-1: 197 71% 58%;
+    --chart-2: 28 100% 65%;
+    --chart-3: 197 50% 75%;
+    --chart-4: 28 80% 80%;
+    --chart-5: 197 30% 85%;
 
-    --sidebar-background: 300 25% 15%;
-    --sidebar-foreground: 50 40% 90%;
-    --sidebar-primary: 285 65% 60%;
+    --sidebar-background: 210 10% 18%;
+    --sidebar-foreground: 204 10% 90%;
+    --sidebar-primary: 197 71% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 300 20% 22%;
-    --sidebar-accent-foreground: 50 40% 90%;
-    --sidebar-border: 300 20% 25%;
-    --sidebar-ring: 285 65% 60%;
+    --sidebar-accent: 28 100% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 10% 22%;
+    --sidebar-ring: 197 71% 58%;
   }
 }
 
@@ -102,6 +103,15 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter), sans-serif;
+  }
+  /* Hide spinners from number inputs */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
   }
 }
 
