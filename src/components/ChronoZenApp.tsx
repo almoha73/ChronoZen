@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -33,8 +34,8 @@ const ChronoZenApp: React.FC = () => {
 
   const fetchAnimationPace = useCallback(async () => {
     if (initialTime <= 0) return;
-    // Debounce AI calls to prevent excessive calls, e.g., once every 2 seconds
-    if (Date.now() - lastAiCallTimeRef.current < 2000 && timerState === 'running') return;
+    // Debounce AI calls to prevent excessive calls, e.g., once every 5 seconds
+    if (Date.now() - lastAiCallTimeRef.current < 5000 && timerState === 'running') return;
 
     lastAiCallTimeRef.current = Date.now();
     try {
@@ -46,9 +47,9 @@ const ChronoZenApp: React.FC = () => {
       setAnimationPace(result.animationPace);
       // setAiReasoning(result.reasoning); // console.log("AI Pacing:", result.animationPace, result.reasoning);
     } catch (error) {
-      console.error("Error fetching animation pace:", error);
+      console.error("Erreur lors de la récupération du rythme d'animation:", error);
       setAnimationPace(1); // Default to normal pace on error
-      // setAiReasoning("Error fetching pacing info.");
+      // setAiReasoning("Erreur lors de la récupération des informations de rythme.");
     }
   }, [initialTime, currentTime, timerState]);
 
@@ -156,7 +157,7 @@ const ChronoZenApp: React.FC = () => {
         >
           {getControlIcon()}
         </Button>
-        {/* <p className="text-xs text-muted-foreground text-center h-8 overflow-y-auto">AI Reasoning: {aiReasoning || "N/A"}</p> */}
+        {/* <p className="text-xs text-muted-foreground text-center h-8 overflow-y-auto">Raisonnement IA: {aiReasoning || "N/A"}</p> */}
 
       </CardContent>
     </Card>
