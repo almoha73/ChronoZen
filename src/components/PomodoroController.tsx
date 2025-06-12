@@ -1,0 +1,293 @@
+
+"use client";
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import TimerDisplay from './TimerDisplay';
+import CircularProgress from './CircularProgress';
+import { useToast } from "@/hooks/use-toast";
+import { adjustAnimationPace, type AdjustAnimationPaceInput } from '@/ai/flows/smart-animation-pacing';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+type TimerState = "idle" | "running" | "paused";
+type PomodoroPhase = "work" | "short-break" | "long-break" | null;
+
+const DEFAULT_POMODORO_WORK_DURATION = 25 * 60;
+const DEFAULT_POMODORO_SHORT_BREAK_DURATION = 5 * 60;
+const DEFAULT_POMODORO_LONG_BREAK_DURATION = 15 * 60;
+const POMODORO_CYCLES_BEFORE_LONG_BREAK = 4;
+
+const PomodoroController: React.FC = () => {
+  const [initialTime, setInitialTime] = useState<number>(DEFAULT_POMODORO_WORK_DURATION);
+  const [currentTime, setCurrentTime] = useState<number>(DEFAULT_POMODORO_WORK_DURATION);
+  const [timerState, setTimerState] = useState<TimerState>("idle");
+  const [animationPace, setAnimationPace] = useState<number>(1);
+  const { toast } = useToast();
+  const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
+  const lastAiCallTimeRef = useRef<number>(0);
+
+  const [pomodoroCycle, setPomodoroCycle] = useState<number>(0); 
+  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>(null);
+
+  const [workMinutes, setWorkMinutes] = useState<string>("25");
+  const [shortBreakMinutes, setShortBreakMinutes] = useState<string>("5");
+  const [longBreakMinutes, setLongBreakMinutes] = useState<string>("15");
+
+  const getPomodoroWorkDuration = useCallback(() => (parseInt(workMinutes, 10) * 60) || DEFAULT_POMODORO_WORK_DURATION, [workMinutes]);
+  const getPomodoroShortBreakDuration = useCallback(() => (parseInt(shortBreakMinutes, 10) * 60) || DEFAULT_POMODORO_SHORT_BREAK_DURATION, [shortBreakMinutes]);
+  const getPomodoroLongBreakDuration = useCallback(() => (parseInt(longBreakMinutes, 10) * 60) || DEFAULT_POMODORO_LONG_BREAK_DURATION, [longBreakMinutes]);
+
+  const fetchAnimationPace = useCallback(async () => {
+    if (initialTime <= 0) return;
+    if (Date.now() - lastAiCallTimeRef.current < 5000 && timerState === 'running') return;
+
+    lastAiCallTimeRef.current = Date.now();
+    try {
+      const input: AdjustAnimationPaceInput = {
+        selectedTime: initialTime,
+        remainingTime: currentTime,
+      };
+      const result = await adjustAnimationPace(input);
+      setAnimationPace(result.animationPace);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du rythme d'animation:", error);
+      setAnimationPace(1);
+    }
+  }, [initialTime, currentTime, timerState]);
+
+  const resetPomodoroState = useCallback(() => {
+    setPomodoroCycle(0);
+    setPomodoroPhase(null);
+    const currentWorkDuration = getPomodoroWorkDuration();
+    setInitialTime(currentWorkDuration);
+    setCurrentTime(currentWorkDuration);
+    setTimerState("idle");
+  }, [getPomodoroWorkDuration]);
+
+  useEffect(() => {
+    if (timerState === "running" && currentTime > 0) {
+      fetchAnimationPace();
+      timerIntervalRef.current = setInterval(() => {
+        setCurrentTime((prevTime) => Math.max(0, prevTime - 1));
+      }, 1000);
+    } else if (timerState === "running" && currentTime === 0) {
+      clearInterval(timerIntervalRef.current);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      if (pomodoroPhase) { // pomodoroMode is implied if pomodoroPhase is not null
+        const currentShortBreakDuration = getPomodoroShortBreakDuration();
+        const currentLongBreakDuration = getPomodoroLongBreakDuration();
+        const currentWorkDuration = getPomodoroWorkDuration();
+
+        if (pomodoroPhase === "work") {
+          if (pomodoroCycle < POMODORO_CYCLES_BEFORE_LONG_BREAK) {
+            setPomodoroPhase("short-break");
+            setInitialTime(currentShortBreakDuration);
+            setCurrentTime(currentShortBreakDuration);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause courte (${currentShortBreakDuration / 60} min). Cycle ${pomodoroCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK}.` });
+            setTimerState("running");
+          } else { 
+            setPomodoroPhase("long-break");
+            setInitialTime(currentLongBreakDuration);
+            setCurrentTime(currentLongBreakDuration);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause longue méritée (${currentLongBreakDuration / 60} min) !` });
+            setTimerState("running");
+          }
+        } else if (pomodoroPhase === "short-break") {
+          const nextWorkCycle = pomodoroCycle + 1;
+          setPomodoroCycle(nextWorkCycle);
+          setPomodoroPhase("work");
+          setInitialTime(currentWorkDuration);
+          setCurrentTime(currentWorkDuration);
+          toast({ title: "ChronoZen Pomodoro", description: `Cycle ${nextWorkCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail !` });
+          setTimerState("running");
+        } else if (pomodoroPhase === "long-break") {
+          toast({ title: "ChronoZen Pomodoro", description: `Session Pomodoro terminée ! Bravo !` });
+          resetPomodoroState();
+          // Timer remains idle, ready for new Pomodoro or manual start
+        }
+      } else { // Should not happen if pomodoroPhase is managed correctly
+        toast({ title: "ChronoZen", description: "C'est terminé !" });
+        setTimerState("idle");
+      }
+      fetchAnimationPace();
+    } else {
+      clearInterval(timerIntervalRef.current);
+      if (timerState !== 'running' && initialTime > 0) {
+        fetchAnimationPace();
+      }
+    }
+    return () => clearInterval(timerIntervalRef.current);
+  }, [timerState, currentTime, initialTime, toast, fetchAnimationPace, pomodoroPhase, pomodoroCycle, resetPomodoroState, getPomodoroWorkDuration, getPomodoroShortBreakDuration, getPomodoroLongBreakDuration]);
+
+  const handleStartPomodoro = () => {
+    const currentWorkDuration = getPomodoroWorkDuration();
+    setPomodoroCycle(1);
+    setPomodoroPhase("work");
+    setInitialTime(currentWorkDuration);
+    setCurrentTime(currentWorkDuration);
+    setTimerState("running");
+    toast({ title: "ChronoZen Pomodoro", description: `Cycle 1/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail ! (${currentWorkDuration / 60} min)` });
+  };
+
+  const handleControlClick = () => {
+    if (!pomodoroPhase && timerState === "idle") { // Not in pomodoro, simple start for current duration
+        if (currentTime === 0 || currentTime < initialTime ) {
+            setCurrentTime(initialTime); // Reset to initial if at 0 or partially run
+        }
+        setTimerState("running");
+        return;
+    }
+    
+    // Pomodoro logic
+    if (timerState === "idle" && pomodoroPhase) { // Pomodoro was paused and finished, or reset
+      // This case means pomodoro finished and reset or user wants to restart a phase
+      if (currentTime === 0) { // If a phase finished
+         // Let useEffect handle next phase or end of session. If it's truly idle, user might want to restart current phase.
+         // For now, if pomodoroPhase is set and timer is 0 and idle, this means session ended.
+         // Let handleStartPomodoro re-initiate a new session.
+         // This button should ideally be "Start New Pomodoro Session" or similar if session ended.
+         // For simplicity, let's assume it restarts the current displayed time if pomodoroPhase is set.
+         setCurrentTime(initialTime); // Reset to the current phase's initial time
+      }
+      setTimerState("running");
+
+    } else if (timerState === "running") {
+      setTimerState("paused");
+    } else if (timerState === "paused") {
+      setTimerState("running");
+    }
+  };
+
+
+  const getControlIcon = () => {
+    if (timerState === "running") return <Pause className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    // If pomodoro session ended and timer is idle (currentTime is 0 after long break)
+    if (pomodoroPhase === "long-break" && currentTime === 0 && timerState === "idle") {
+        return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />; // Indicates session done, can reset for new Pomodoro
+    }
+    // If a phase just ended (currentTime is 0) but useEffect will transition it to running for next phase, show play
+    // If it's paused or idle (and not end of session)
+    if (timerState === "idle" || timerState === "paused") {
+        if (currentTime === 0 || (currentTime < initialTime && initialTime > 0 && pomodoroPhase)) {
+             // If a phase is set and timer ran down or was reset manually
+            return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+        }
+    }
+    return <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+  };
+  
+  const progressPercentage = initialTime > 0 ? ((initialTime - currentTime) / initialTime) * 100 : 0;
+
+  const getAriaLabelForControl = () => {
+    if (timerState === 'running') return 'Mettre en pause';
+    if (pomodoroPhase === "long-break" && currentTime === 0 && timerState === "idle") return 'Nouvelle Session Pomodoro';
+    if (timerState === 'idle' && (currentTime === 0 || (currentTime < initialTime && initialTime > 0 && pomodoroPhase))) {
+      return 'Réinitialiser la phase';
+    }
+    return 'Démarrer';
+  };
+
+  const isPomodoroSessionActive = timerState === 'running' && pomodoroPhase !== null;
+
+  return (
+    <Card className="w-full max-w-md p-4 md:p-8 shadow-2xl rounded-xl bg-card animate-fade-in">
+      <CardContent className="flex flex-col items-center justify-center space-y-6 md:space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-headline font-bold text-primary">ChronoZen Pomodoro</h1>
+          <p className="text-muted-foreground">Configurez et lancez votre session.</p>
+        </div>
+        
+        <div className="w-full space-y-4">
+          <Button
+            variant="default"
+            onClick={pomodoroPhase && currentTime === 0 && timerState === "idle" ? resetPomodoroState : handleStartPomodoro}
+            className="w-full active:scale-95 transition-transform"
+            disabled={timerState === 'running' && pomodoroPhase !== null}
+          >
+            {pomodoroPhase && currentTime === 0 && timerState === "idle" ? 'Démarrer Nouvelle Session' : 'Démarrer Session Pomodoro'}
+          </Button>
+
+          <div className="grid grid-cols-3 gap-x-2 gap-y-3 w-full pt-2">
+            <div>
+              <Label htmlFor="workDuration" className="text-xs text-muted-foreground">Travail (min)</Label>
+              <Input 
+                id="workDuration" 
+                type="number" 
+                min="1"
+                value={workMinutes} 
+                onChange={(e) => setWorkMinutes(e.target.value)} 
+                disabled={isPomodoroSessionActive}
+                className="h-9 text-sm mt-1"
+                aria-label="Durée du travail en minutes"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground">Pause Courte (min)</Label>
+              <Input 
+                id="shortBreakDuration" 
+                type="number" 
+                min="1"
+                value={shortBreakMinutes} 
+                onChange={(e) => setShortBreakMinutes(e.target.value)} 
+                disabled={isPomodoroSessionActive}
+                className="h-9 text-sm mt-1"
+                aria-label="Durée de la pause courte en minutes"
+              />
+            </div>
+            <div>
+              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground">Pause Longue (min)</Label>
+              <Input 
+                id="longBreakDuration" 
+                type="number" 
+                min="1"
+                value={longBreakMinutes} 
+                onChange={(e) => setLongBreakMinutes(e.target.value)} 
+                disabled={isPomodoroSessionActive}
+                className="h-9 text-sm mt-1"
+                aria-label="Durée de la pause longue en minutes"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <CircularProgress 
+          percentage={progressPercentage} 
+          animationPace={animationPace}
+          colorClass="stroke-primary"
+          trackColorClass="stroke-border/50"
+          size={260}
+          strokeWidth={18}
+        >
+          <TimerDisplay seconds={currentTime} phase={pomodoroPhase} />
+        </CircularProgress>
+
+        <Button
+          onClick={handleControlClick}
+          className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
+          aria-label={getAriaLabelForControl()}
+           disabled={pomodoroPhase === null && timerState === 'idle' && currentTime !== initialTime} // Disable if no pomodoro started and timer is not at initial state
+        >
+          {getControlIcon()}
+        </Button>
+         {pomodoroPhase && timerState !== "running" && (
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={resetPomodoroState}
+                className="mt-4"
+            >
+                Réinitialiser la Session Pomodoro
+            </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default PomodoroController;
