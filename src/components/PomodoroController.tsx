@@ -169,18 +169,18 @@ const PomodoroController: React.FC = () => {
 
 
   const getControlIcon = () => {
-    if (timerState === "running") return <Pause className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    if (timerState === "running") return <Pause className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
     
     // If a Pomodoro session is active (or has been) and is now idle/paused
     if (pomodoroPhase) {
         // If the current phase just ended (currentTime is 0) and we are idle (e.g. long break finished)
         // OR if timer was paused then reset (currentTime < initialTime)
         if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime))) {
-             return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+             return <RotateCcw className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
         }
     }
     // Default to Play if idle/paused and not a reset condition
-    return <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    return <Play className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
   };
   
   const progressPercentage = initialTime > 0 ? ((initialTime - currentTime) / initialTime) * 100 : 0;

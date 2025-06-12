@@ -103,21 +103,26 @@ const ChronoZenApp: React.FC = () => {
 
   const handleControlClick = () => {
     if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
-      setCurrentTime(initialTime);
-      setTimerState("idle"); 
+      // Condition for Reset: Timer is idle and either at 0 or stopped mid-way
+      setCurrentTime(initialTime); // Reset time
+      setTimerState("idle");       // Ensure state is idle (ready for Play)
     } else if (timerState === "running") { 
+      // Condition for Pause: Timer is running
       setTimerState("paused");
     } else { 
+      // Condition for Play: Timer is idle (fresh start or after reset) or paused
       setTimerState("running");
     }
   };
 
   const getControlIcon = () => {
-    if (timerState === "running") return <Pause className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    if (timerState === "running") return <Pause className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
+    // If timer is idle AND (it's at 0 OR it was stopped mid-way and needs reset)
     if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
-      return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+      return <RotateCcw className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
     }
-    return <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    // Default to Play (timer is idle and ready, or paused)
+    return <Play className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
   };
   
   const progressPercentage = initialTime > 0 ? ((initialTime - currentTime) / initialTime) * 100 : 0;
