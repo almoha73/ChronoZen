@@ -201,9 +201,9 @@ const PomodoroController: React.FC = () => {
             {pomodoroPhase && currentTime === 0 && timerState === "idle" ? 'Démarrer Nouvelle Session' : 'Démarrer Session Pomodoro'}
           </Button>
 
-          <div className="grid grid-cols-3 gap-x-4 gap-y-3 w-full pt-2">
-            <div>
-              <Label htmlFor="workDuration" className="text-xs text-muted-foreground">Travail (min)</Label>
+          <div className="grid grid-cols-3 gap-x-4 w-full pt-2">
+            <div className="flex flex-col">
+              <Label htmlFor="workDuration" className="text-xs text-muted-foreground mb-1 self-start">Travail (min)</Label>
               <Input 
                 id="workDuration" 
                 type="number" 
@@ -211,12 +211,12 @@ const PomodoroController: React.FC = () => {
                 value={workMinutes} 
                 onChange={(e) => setWorkMinutes(e.target.value)} 
                 disabled={isPomodoroSessionActive}
-                className="h-9 text-sm mt-1"
+                className="h-9 text-sm w-full text-center"
                 aria-label="Durée du travail en minutes"
               />
             </div>
-            <div>
-              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground">Pause Courte (min)</Label>
+            <div className="flex flex-col">
+              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground mb-1 self-start">Pause Courte (min)</Label>
               <Input 
                 id="shortBreakDuration" 
                 type="number" 
@@ -224,12 +224,12 @@ const PomodoroController: React.FC = () => {
                 value={shortBreakMinutes} 
                 onChange={(e) => setShortBreakMinutes(e.target.value)} 
                 disabled={isPomodoroSessionActive}
-                className="h-9 text-sm mt-1"
+                className="h-9 text-sm w-full text-center"
                 aria-label="Durée de la pause courte en minutes"
               />
             </div>
-            <div>
-              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground">Pause Longue (min)</Label>
+            <div className="flex flex-col">
+              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground mb-1 self-start">Pause Longue (min)</Label>
               <Input 
                 id="longBreakDuration" 
                 type="number" 
@@ -237,7 +237,7 @@ const PomodoroController: React.FC = () => {
                 value={longBreakMinutes} 
                 onChange={(e) => setLongBreakMinutes(e.target.value)} 
                 disabled={isPomodoroSessionActive}
-                className="h-9 text-sm mt-1"
+                className="h-9 text-sm w-full text-center"
                 aria-label="Durée de la pause longue en minutes"
               />
             </div>
@@ -279,3 +279,4 @@ const PomodoroController: React.FC = () => {
 };
 
 export default PomodoroController;
+
