@@ -28,10 +28,10 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <nav className="bg-card p-4 shadow-md sticky top-0 z-50">
           <div className="container mx-auto flex justify-center items-center space-x-6">
-            <Link href="/" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link href="/" className="text-card-foreground hover:text-card-foreground/80 font-medium transition-colors">
               Minuteur Simple
             </Link>
-            <Link href="/pomodoro" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link href="/pomodoro" className="text-card-foreground hover:text-card-foreground/80 font-medium transition-colors">
               Pomodoro
             </Link>
           </div>
