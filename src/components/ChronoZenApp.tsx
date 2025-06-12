@@ -9,6 +9,8 @@ import TimerDisplay from './TimerDisplay';
 import CircularProgress from './CircularProgress';
 import { useToast } from "@/hooks/use-toast";
 import { adjustAnimationPace, type AdjustAnimationPaceInput } from '@/ai/flows/smart-animation-pacing';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type TimerState = "idle" | "running" | "paused";
 type PomodoroPhase = "work" | "short-break" | "long-break" | null;
@@ -23,9 +25,9 @@ const presetTimes = [
   { label: "30:00", seconds: 1800 },
 ];
 
-const POMODORO_WORK_DURATION = 25 * 60;
-const POMODORO_SHORT_BREAK_DURATION = 5 * 60;
-const POMODORO_LONG_BREAK_DURATION = 15 * 60;
+const DEFAULT_POMODORO_WORK_DURATION = 25 * 60;
+const DEFAULT_POMODORO_SHORT_BREAK_DURATION = 5 * 60;
+const DEFAULT_POMODORO_LONG_BREAK_DURATION = 15 * 60;
 const POMODORO_CYCLES_BEFORE_LONG_BREAK = 4;
 
 const ChronoZenApp: React.FC = () => {
@@ -40,6 +42,15 @@ const ChronoZenApp: React.FC = () => {
   const [pomodoroMode, setPomodoroMode] = useState<boolean>(false);
   const [pomodoroCycle, setPomodoroCycle] = useState<number>(0); 
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>(null);
+
+  const [workMinutes, setWorkMinutes] = useState<string>("25");
+  const [shortBreakMinutes, setShortBreakMinutes] = useState<string>("5");
+  const [longBreakMinutes, setLongBreakMinutes] = useState<string>("15");
+
+  const getPomodoroWorkDuration = useCallback(() => (parseInt(workMinutes, 10) * 60) || DEFAULT_POMODORO_WORK_DURATION, [workMinutes]);
+  const getPomodoroShortBreakDuration = useCallback(() => (parseInt(shortBreakMinutes, 10) * 60) || DEFAULT_POMODORO_SHORT_BREAK_DURATION, [shortBreakMinutes]);
+  const getPomodoroLongBreakDuration = useCallback(() => (parseInt(longBreakMinutes, 10) * 60) || DEFAULT_POMODORO_LONG_BREAK_DURATION, [longBreakMinutes]);
+
 
   const fetchAnimationPace = useCallback(async () => {
     if (initialTime <= 0) return;
@@ -78,32 +89,36 @@ const ChronoZenApp: React.FC = () => {
       }
 
       if (pomodoroMode && pomodoroPhase) {
+        const currentShortBreakDuration = getPomodoroShortBreakDuration();
+        const currentLongBreakDuration = getPomodoroLongBreakDuration();
+        const currentWorkDuration = getPomodoroWorkDuration();
+
         if (pomodoroPhase === "work") {
           if (pomodoroCycle < POMODORO_CYCLES_BEFORE_LONG_BREAK) {
             setPomodoroPhase("short-break");
-            setInitialTime(POMODORO_SHORT_BREAK_DURATION);
-            setCurrentTime(POMODORO_SHORT_BREAK_DURATION);
-            toast({ title: "ChronoZen Pomodoro", description: `Pause courte (${POMODORO_SHORT_BREAK_DURATION / 60} min). Cycle ${pomodoroCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK}.` });
+            setInitialTime(currentShortBreakDuration);
+            setCurrentTime(currentShortBreakDuration);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause courte (${currentShortBreakDuration / 60} min). Cycle ${pomodoroCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK}.` });
             setTimerState("running");
-          } else { // After 4th work cycle
+          } else { 
             setPomodoroPhase("long-break");
-            setInitialTime(POMODORO_LONG_BREAK_DURATION);
-            setCurrentTime(POMODORO_LONG_BREAK_DURATION);
-            toast({ title: "ChronoZen Pomodoro", description: `Pause longue méritée (${POMODORO_LONG_BREAK_DURATION / 60} min) !` });
+            setInitialTime(currentLongBreakDuration);
+            setCurrentTime(currentLongBreakDuration);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause longue méritée (${currentLongBreakDuration / 60} min) !` });
             setTimerState("running");
           }
         } else if (pomodoroPhase === "short-break") {
           const nextWorkCycle = pomodoroCycle + 1;
           setPomodoroCycle(nextWorkCycle);
           setPomodoroPhase("work");
-          setInitialTime(POMODORO_WORK_DURATION);
-          setCurrentTime(POMODORO_WORK_DURATION);
+          setInitialTime(currentWorkDuration);
+          setCurrentTime(currentWorkDuration);
           toast({ title: "ChronoZen Pomodoro", description: `Cycle ${nextWorkCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail !` });
           setTimerState("running");
         } else if (pomodoroPhase === "long-break") {
-          toast({ title: "ChronoZen Pomodoro", description: "Session Pomodoro (4x25/5 + 15) terminée ! Bravo !" });
+          toast({ title: "ChronoZen Pomodoro", description: `Session Pomodoro terminée ! Bravo !` });
           resetPomodoroState();
-          const defaultPreset = presetTimes.find(p => p.seconds === POMODORO_WORK_DURATION) || presetTimes[1];
+          const defaultPreset = presetTimes.find(p => p.seconds === getPomodoroWorkDuration()) || presetTimes[1];
           setInitialTime(defaultPreset.seconds);
           setCurrentTime(defaultPreset.seconds);
           setTimerState("idle");
@@ -120,7 +135,7 @@ const ChronoZenApp: React.FC = () => {
       }
     }
     return () => clearInterval(timerIntervalRef.current);
-  }, [timerState, currentTime, initialTime, toast, fetchAnimationPace, pomodoroMode, pomodoroPhase, pomodoroCycle, resetPomodoroState]);
+  }, [timerState, currentTime, initialTime, toast, fetchAnimationPace, pomodoroMode, pomodoroPhase, pomodoroCycle, resetPomodoroState, getPomodoroWorkDuration, getPomodoroShortBreakDuration, getPomodoroLongBreakDuration]);
 
 
   const handlePresetSelect = (seconds: number) => {
@@ -131,13 +146,14 @@ const ChronoZenApp: React.FC = () => {
   };
 
   const handleStartPomodoro = () => {
+    const currentWorkDuration = getPomodoroWorkDuration();
     setPomodoroMode(true);
     setPomodoroCycle(1);
     setPomodoroPhase("work");
-    setInitialTime(POMODORO_WORK_DURATION);
-    setCurrentTime(POMODORO_WORK_DURATION);
+    setInitialTime(currentWorkDuration);
+    setCurrentTime(currentWorkDuration);
     setTimerState("running");
-    toast({ title: "ChronoZen Pomodoro", description: `Cycle 1/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail !` });
+    toast({ title: "ChronoZen Pomodoro", description: `Cycle 1/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail ! (${currentWorkDuration / 60} min)` });
   };
 
   const handleControlClick = () => {
@@ -175,6 +191,8 @@ const ChronoZenApp: React.FC = () => {
     return 'Démarrer';
   };
 
+  const isPomodoroActive = timerState === 'running' && pomodoroMode;
+
   return (
     <Card className="w-full max-w-md p-4 md:p-8 shadow-2xl rounded-xl bg-card animate-fade-in">
       <CardContent className="flex flex-col items-center justify-center space-y-6 md:space-y-8">
@@ -190,20 +208,62 @@ const ChronoZenApp: React.FC = () => {
               variant={initialTime === preset.seconds && timerState === 'idle' && !pomodoroMode ? "default" : "outline"}
               onClick={() => handlePresetSelect(preset.seconds)}
               className="active:scale-95 transition-transform text-sm md:text-base px-3 py-1.5 h-auto md:px-4 md:py-2 bg-accent hover:bg-accent/90 text-accent-foreground border-accent hover:border-accent/90 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              disabled={isPomodoroActive}
             >
               {preset.label}
             </Button>
           ))}
         </div>
+        
+        <div className="w-full space-y-4">
+          <Button
+            variant="default"
+            onClick={handleStartPomodoro}
+            className="w-full active:scale-95 transition-transform"
+            disabled={isPomodoroActive}
+          >
+            Démarrer Session Pomodoro
+          </Button>
 
-        <Button
-          variant="default"
-          onClick={handleStartPomodoro}
-          className="w-full active:scale-95 transition-transform"
-          disabled={timerState === 'running' && pomodoroMode && pomodoroPhase !== null && pomodoroCycle > 0}
-        >
-          Démarrer Session Pomodoro
-        </Button>
+          <div className="grid grid-cols-3 gap-x-2 gap-y-3 w-full pt-2">
+            <div>
+              <Label htmlFor="workDuration" className="text-xs text-muted-foreground">Travail (min)</Label>
+              <Input 
+                id="workDuration" 
+                type="number" 
+                min="1"
+                value={workMinutes} 
+                onChange={(e) => setWorkMinutes(e.target.value)} 
+                disabled={isPomodoroActive}
+                className="h-9 text-sm mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground">Pause Courte (min)</Label>
+              <Input 
+                id="shortBreakDuration" 
+                type="number" 
+                min="1"
+                value={shortBreakMinutes} 
+                onChange={(e) => setShortBreakMinutes(e.target.value)} 
+                disabled={isPomodoroActive}
+                className="h-9 text-sm mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground">Pause Longue (min)</Label>
+              <Input 
+                id="longBreakDuration" 
+                type="number" 
+                min="1"
+                value={longBreakMinutes} 
+                onChange={(e) => setLongBreakMinutes(e.target.value)} 
+                disabled={isPomodoroActive}
+                className="h-9 text-sm mt-1"
+              />
+            </div>
+          </div>
+        </div>
         
         <CircularProgress 
           percentage={progressPercentage} 
@@ -230,3 +290,5 @@ const ChronoZenApp: React.FC = () => {
 };
 
 export default ChronoZenApp;
+
+    
