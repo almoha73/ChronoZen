@@ -11,7 +11,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({ seconds }) => {
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 
   return (
-    <div className="text-7xl md:text-8xl font-headline font-bold text-foreground tabular-nums select-none">
+    <div className="text-6xl md:text-7xl font-headline font-bold text-foreground tabular-nums select-none">
       {formattedTime}
     </div>
   );
