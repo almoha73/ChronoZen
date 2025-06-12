@@ -203,7 +203,7 @@ const PomodoroController: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-x-4 w-full pt-2">
             <div className="flex flex-col">
-              <Label htmlFor="workDuration" className="text-xs text-muted-foreground mb-1 self-start">Travail (min)</Label>
+              <Label htmlFor="workDuration" className="text-xs text-muted-foreground mb-1 self-start h-8">Travail (min)</Label>
               <Input 
                 id="workDuration" 
                 type="number" 
@@ -216,7 +216,7 @@ const PomodoroController: React.FC = () => {
               />
             </div>
             <div className="flex flex-col">
-              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground mb-1 self-start">Pause Courte (min)</Label>
+              <Label htmlFor="shortBreakDuration" className="text-xs text-muted-foreground mb-1 self-start h-8">Pause Courte (min)</Label>
               <Input 
                 id="shortBreakDuration" 
                 type="number" 
@@ -229,7 +229,7 @@ const PomodoroController: React.FC = () => {
               />
             </div>
             <div className="flex flex-col">
-              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground mb-1 self-start">Pause Longue (min)</Label>
+              <Label htmlFor="longBreakDuration" className="text-xs text-muted-foreground mb-1 self-start h-8">Pause Longue (min)</Label>
               <Input 
                 id="longBreakDuration" 
                 type="number" 
@@ -279,4 +279,3 @@ const PomodoroController: React.FC = () => {
 };
 
 export default PomodoroController;
-
