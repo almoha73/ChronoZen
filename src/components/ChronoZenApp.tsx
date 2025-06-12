@@ -65,8 +65,8 @@ const ChronoZenApp: React.FC = () => {
       }
       toast({ title: "ChronoZen", description: "C'est terminé !" });
       setTimerState("idle");
-      fetchAnimationPace();
-    } else {
+      fetchAnimationPace(); // Fetch pace when timer finishes and becomes idle
+    } else { // Covers "paused" or "idle" (with currentTime > 0 or initialTime > 0)
       clearInterval(timerIntervalRef.current);
       if (timerState !== 'running' && initialTime > 0) {
         fetchAnimationPace();
@@ -80,7 +80,7 @@ const ChronoZenApp: React.FC = () => {
     setInitialTime(seconds);
     setCurrentTime(seconds);
     setTimerState("idle");
-    setCustomMinutes(""); // Clear custom input when a preset is selected
+    setCustomMinutes(""); 
   };
 
   const handleCustomTimeSet = () => {
@@ -100,23 +100,26 @@ const ChronoZenApp: React.FC = () => {
   };
 
   const handleControlClick = () => {
-    if (timerState === "idle") {
-      if (currentTime === 0 || (currentTime < initialTime && initialTime > 0)) {
-        setCurrentTime(initialTime);
-      }
-      setTimerState("running");
-    } else if (timerState === "running") {
+    // Determine if the action is a "Reset" based on current state and time
+    const isResetAction = timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0));
+
+    if (isResetAction) {
+      setCurrentTime(initialTime);
+      setTimerState("idle"); // Stay idle after reset
+    } else if (timerState === "running") { // If running, then Pause
       setTimerState("paused");
-    } else if (timerState === "paused") {
+    } else { // If idle (and not a reset action) or paused, then Start/Resume
       setTimerState("running");
     }
   };
 
   const getControlIcon = () => {
     if (timerState === "running") return <Pause className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
+    // If idle AND (time is up OR timer was started and then stopped/finished before completing full initialTime)
     if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
       return <RotateCcw className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
     }
+    // Otherwise, show Play (this covers idle at full time, or paused)
     return <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground" />;
   };
   
@@ -192,7 +195,7 @@ const ChronoZenApp: React.FC = () => {
           onClick={handleControlClick}
           className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
           aria-label={getAriaLabelForControl()}
-          disabled={initialTime <= 0 && currentTime <= 0}
+          disabled={initialTime <= 0 && currentTime < 0 } // Allow reset even if currentTime is 0 but initialTime was >0
         >
           {getControlIcon()}
         </Button>
