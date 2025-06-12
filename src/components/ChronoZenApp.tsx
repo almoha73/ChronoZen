@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { adjustAnimationPace, type AdjustAnimationPaceInput } from '@/ai/flows/smart-animation-pacing';
 
 type TimerState = "idle" | "running" | "paused";
-type PomodoroPhase = "work" | "break" | null;
+type PomodoroPhase = "work" | "short-break" | "long-break" | null;
 
 const presetTimes = [
   { label: "3:30", seconds: 210 },
@@ -19,16 +19,17 @@ const presetTimes = [
   { label: "10:00", seconds: 600 },
   { label: "15:00", seconds: 900 },
   { label: "20:00", seconds: 1200 },
-  { label: "25:00", seconds: 1500 }, // Standard 25 minutes
+  { label: "25:00", seconds: 1500 },
   { label: "30:00", seconds: 1800 },
 ];
 
 const POMODORO_WORK_DURATION = 25 * 60;
-const POMODORO_BREAK_DURATION = 5 * 60;
-const POMODORO_TOTAL_CYCLES = 4;
+const POMODORO_SHORT_BREAK_DURATION = 5 * 60;
+const POMODORO_LONG_BREAK_DURATION = 15 * 60;
+const POMODORO_CYCLES_BEFORE_LONG_BREAK = 4;
 
 const ChronoZenApp: React.FC = () => {
-  const [initialTime, setInitialTime] = useState<number>(presetTimes[1].seconds); // Default to 5:00
+  const [initialTime, setInitialTime] = useState<number>(presetTimes[1].seconds);
   const [currentTime, setCurrentTime] = useState<number>(presetTimes[1].seconds);
   const [timerState, setTimerState] = useState<TimerState>("idle");
   const [animationPace, setAnimationPace] = useState<number>(1);
@@ -36,9 +37,8 @@ const ChronoZenApp: React.FC = () => {
   const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
   const lastAiCallTimeRef = useRef<number>(0);
 
-  // Pomodoro state
   const [pomodoroMode, setPomodoroMode] = useState<boolean>(false);
-  const [pomodoroCycle, setPomodoroCycle] = useState<number>(0); // 0 = not active, 1-4 for work cycles
+  const [pomodoroCycle, setPomodoroCycle] = useState<number>(0); 
   const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>(null);
 
   const fetchAnimationPace = useCallback(async () => {
@@ -79,38 +79,41 @@ const ChronoZenApp: React.FC = () => {
 
       if (pomodoroMode && pomodoroPhase) {
         if (pomodoroPhase === "work") {
-          if (pomodoroCycle < POMODORO_TOTAL_CYCLES) {
-            setPomodoroPhase("break");
-            setInitialTime(POMODORO_BREAK_DURATION);
-            setCurrentTime(POMODORO_BREAK_DURATION);
-            toast({ title: "ChronoZen Pomodoro", description: `Pause du cycle ${pomodoroCycle}/${POMODORO_TOTAL_CYCLES}.` });
-            setTimerState("running"); // Auto-start break
-          } else {
-            // Last work cycle finished
-            toast({ title: "ChronoZen Pomodoro", description: "Session Pomodoro terminée ! Excellent travail !" });
-            resetPomodoroState();
-            const defaultPreset = presetTimes.find(p => p.seconds === POMODORO_WORK_DURATION) || presetTimes[1];
-            setInitialTime(defaultPreset.seconds);
-            setCurrentTime(defaultPreset.seconds);
-            setTimerState("idle");
+          if (pomodoroCycle < POMODORO_CYCLES_BEFORE_LONG_BREAK) {
+            setPomodoroPhase("short-break");
+            setInitialTime(POMODORO_SHORT_BREAK_DURATION);
+            setCurrentTime(POMODORO_SHORT_BREAK_DURATION);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause courte (${POMODORO_SHORT_BREAK_DURATION / 60} min). Cycle ${pomodoroCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK}.` });
+            setTimerState("running");
+          } else { // After 4th work cycle
+            setPomodoroPhase("long-break");
+            setInitialTime(POMODORO_LONG_BREAK_DURATION);
+            setCurrentTime(POMODORO_LONG_BREAK_DURATION);
+            toast({ title: "ChronoZen Pomodoro", description: `Pause longue méritée (${POMODORO_LONG_BREAK_DURATION / 60} min) !` });
+            setTimerState("running");
           }
-        } else if (pomodoroPhase === "break") {
-          // Break finished, start next work cycle
+        } else if (pomodoroPhase === "short-break") {
           const nextWorkCycle = pomodoroCycle + 1;
           setPomodoroCycle(nextWorkCycle);
           setPomodoroPhase("work");
           setInitialTime(POMODORO_WORK_DURATION);
           setCurrentTime(POMODORO_WORK_DURATION);
-          toast({ title: "ChronoZen Pomodoro", description: `Cycle ${nextWorkCycle}/${POMODORO_TOTAL_CYCLES} : Au travail !` });
-          setTimerState("running"); // Auto-start next work cycle
+          toast({ title: "ChronoZen Pomodoro", description: `Cycle ${nextWorkCycle}/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail !` });
+          setTimerState("running");
+        } else if (pomodoroPhase === "long-break") {
+          toast({ title: "ChronoZen Pomodoro", description: "Session Pomodoro (4x25/5 + 15) terminée ! Bravo !" });
+          resetPomodoroState();
+          const defaultPreset = presetTimes.find(p => p.seconds === POMODORO_WORK_DURATION) || presetTimes[1];
+          setInitialTime(defaultPreset.seconds);
+          setCurrentTime(defaultPreset.seconds);
+          setTimerState("idle");
         }
       } else {
-        // Standard timer finished
         toast({ title: "ChronoZen", description: "C'est terminé !" });
         setTimerState("idle");
       }
-      fetchAnimationPace(); // Update pace for new state (idle or next phase)
-    } else { // Timer is idle or paused
+      fetchAnimationPace();
+    } else {
       clearInterval(timerIntervalRef.current);
       if (timerState !== 'running' && initialTime > 0) {
         fetchAnimationPace();
@@ -134,24 +137,19 @@ const ChronoZenApp: React.FC = () => {
     setInitialTime(POMODORO_WORK_DURATION);
     setCurrentTime(POMODORO_WORK_DURATION);
     setTimerState("running");
-    toast({ title: "ChronoZen Pomodoro", description: `Cycle 1/${POMODORO_TOTAL_CYCLES} : Au travail !` });
+    toast({ title: "ChronoZen Pomodoro", description: `Cycle 1/${POMODORO_CYCLES_BEFORE_LONG_BREAK} : Au travail !` });
   };
 
   const handleControlClick = () => {
     if (timerState === "idle") {
       if (currentTime === 0 || (currentTime < initialTime && initialTime > 0)) {
         setCurrentTime(initialTime);
-         // If Pomodoro was finished or interrupted, and reset is hit, it just resets current view to initial time
-         // To restart pomodoro, user must click "Démarrer Session Pomodoro"
       }
-      // Only start if not in pomodoro mode or if pomodoro is fully reset and user clicks play on a preset
       if (!pomodoroMode || (pomodoroMode && pomodoroCycle === 0)) {
          setTimerState("running");
-      } else if (pomodoroMode && currentTime > 0) { // If pomodoro is idle but has time (e.g. after manual stop)
+      } else if (pomodoroMode && currentTime > 0) {
          setTimerState("running");
       }
-
-
     } else if (timerState === "running") {
       setTimerState("paused");
     } else if (timerState === "paused") {
@@ -202,9 +200,9 @@ const ChronoZenApp: React.FC = () => {
           variant="default"
           onClick={handleStartPomodoro}
           className="w-full active:scale-95 transition-transform"
-          disabled={timerState === 'running' && pomodoroMode && pomodoroPhase === 'work' && pomodoroCycle > 0}
+          disabled={timerState === 'running' && pomodoroMode && pomodoroPhase !== null && pomodoroCycle > 0}
         >
-          Démarrer Session Pomodoro (4x25/5)
+          Démarrer Session Pomodoro
         </Button>
         
         <CircularProgress 
@@ -222,7 +220,7 @@ const ChronoZenApp: React.FC = () => {
           onClick={handleControlClick}
           className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
           aria-label={getAriaLabelForControl()}
-          disabled={pomodoroMode && timerState === 'idle' && currentTime === 0 && pomodoroPhase !== null} // Disable main control if pomodoro auto-transitions
+          disabled={pomodoroMode && timerState === 'idle' && currentTime === 0 && pomodoroPhase !== null}
         >
           {getControlIcon()}
         </Button>
