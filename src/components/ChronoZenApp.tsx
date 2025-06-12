@@ -2,13 +2,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw, TimerIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import TimerDisplay from './TimerDisplay';
 import CircularProgress from './CircularProgress';
 import { useToast } from "@/hooks/use-toast";
 import { adjustAnimationPace, type AdjustAnimationPaceInput } from '@/ai/flows/smart-animation-pacing';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type TimerState = "idle" | "running" | "paused";
 
@@ -27,6 +29,7 @@ const ChronoZenApp: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<number>(presetTimes[1].seconds);
   const [timerState, setTimerState] = useState<TimerState>("idle");
   const [animationPace, setAnimationPace] = useState<number>(1);
+  const [customMinutes, setCustomMinutes] = useState<string>("");
   const { toast } = useToast();
   const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
   const lastAiCallTimeRef = useRef<number>(0);
@@ -77,6 +80,23 @@ const ChronoZenApp: React.FC = () => {
     setInitialTime(seconds);
     setCurrentTime(seconds);
     setTimerState("idle");
+    setCustomMinutes(""); // Clear custom input when a preset is selected
+  };
+
+  const handleCustomTimeSet = () => {
+    const minutes = parseInt(customMinutes, 10);
+    if (!isNaN(minutes) && minutes > 0) {
+      const seconds = minutes * 60;
+      setInitialTime(seconds);
+      setCurrentTime(seconds);
+      setTimerState("idle");
+    } else {
+      toast({
+        title: "Temps Invalide",
+        description: "Veuillez entrer un nombre de minutes valide.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleControlClick = () => {
@@ -115,20 +135,46 @@ const ChronoZenApp: React.FC = () => {
       <CardContent className="flex flex-col items-center justify-center space-y-6 md:space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-headline font-bold text-primary">ChronoZen Minuteur</h1>
-          <p className="text-muted-foreground">Choisissez un préréglage ou démarrez directement.</p>
+          <p className="text-muted-foreground">Choisissez un préréglage ou définissez votre propre durée.</p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2">
           {presetTimes.map((preset) => (
             <Button
               key={preset.label}
-              variant={initialTime === preset.seconds && timerState === 'idle' ? "default" : "outline"}
+              variant={initialTime === preset.seconds && timerState === 'idle' && customMinutes === "" ? "default" : "outline"}
               onClick={() => handlePresetSelect(preset.seconds)}
               className="active:scale-95 transition-transform text-sm md:text-base px-3 py-1.5 h-auto md:px-4 md:py-2 bg-accent hover:bg-accent/90 text-accent-foreground border-accent hover:border-accent/90 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               {preset.label}
             </Button>
           ))}
+        </div>
+
+        <div className="w-full space-y-3 pt-2">
+          <Label htmlFor="customTimeInput" className="text-sm font-medium text-muted-foreground">
+            Ou définissez une durée personnalisée (minutes) :
+          </Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="customTimeInput"
+              type="number"
+              min="1"
+              value={customMinutes}
+              onChange={(e) => setCustomMinutes(e.target.value)}
+              placeholder="Ex: 45"
+              className="h-10 text-sm w-full"
+              aria-label="Durée personnalisée en minutes"
+            />
+            <Button
+              onClick={handleCustomTimeSet}
+              disabled={!customMinutes}
+              className="h-10 px-4 active:scale-95 transition-transform"
+              aria-label="Définir la durée personnalisée"
+            >
+              <TimerIcon className="mr-2 h-4 w-4" /> Définir
+            </Button>
+          </div>
         </div>
         
         <CircularProgress 
@@ -146,6 +192,7 @@ const ChronoZenApp: React.FC = () => {
           onClick={handleControlClick}
           className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
           aria-label={getAriaLabelForControl()}
+          disabled={initialTime <= 0 && currentTime <= 0}
         >
           {getControlIcon()}
         </Button>
