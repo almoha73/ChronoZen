@@ -18,7 +18,7 @@ const presetTimes = [
   { label: "10:00", seconds: 600 },
   { label: "15:00", seconds: 900 },
   { label: "20:00", seconds: 1200 },
-  { label: "25:00", seconds: 1500 },
+  { label: "Pomodoro", seconds: 1500 }, // 25 minutes for Pomodoro
   { label: "30:00", seconds: 1800 },
 ];
 
