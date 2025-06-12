@@ -1,4 +1,3 @@
-// src/ai/flows/smart-animation-pacing.ts
 'use server';
 
 /**
@@ -13,8 +12,8 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AdjustAnimationPaceInputSchema = z.object({
-  selectedTime: z.number().describe('The initially selected time in seconds.'),
-  remainingTime: z.number().describe('The remaining time in seconds.'),
+  selectedTime: z.number().describe('Le temps initialement sélectionné en secondes.'),
+  remainingTime: z.number().describe('Le temps restant en secondes.'),
 });
 export type AdjustAnimationPaceInput = z.infer<typeof AdjustAnimationPaceInputSchema>;
 
@@ -22,12 +21,12 @@ const AdjustAnimationPaceOutputSchema = z.object({
   animationPace: z
     .number()
     .describe(
-      'The adjusted animation pace, a value between 0 and 1, where 0 is paused and 1 is normal speed.'
+      "La vitesse d'animation ajustée, une valeur entre 0 et 1, où 0 est en pause et 1 est la vitesse normale."
     ),
   reasoning: z
     .string()
     .describe(
-      'The reasoning behind the animation pace.  Explain why the animationPace was chosen.'
+      "Le raisonnement derrière la vitesse d'animation. Expliquez pourquoi animationPace a été choisi."
     ),
 });
 export type AdjustAnimationPaceOutput = z.infer<typeof AdjustAnimationPaceOutputSchema>;
@@ -40,20 +39,20 @@ const adjustAnimationPacePrompt = ai.definePrompt({
   name: 'adjustAnimationPacePrompt',
   input: {schema: AdjustAnimationPaceInputSchema},
   output: {schema: AdjustAnimationPaceOutputSchema},
-  prompt: `You are an expert in UX and animation pacing.
+  prompt: `Vous êtes un expert en UX et en rythme d'animation.
 
-  Given the selected time and the remaining time of a countdown timer, determine an appropriate animation pace for the progress animation.
+  Compte tenu du temps sélectionné et du temps restant d'un compte à rebours, déterminez une vitesse d'animation appropriée pour l'animation de progression.
 
-  The animation pace should be a value between 0 and 1, where 0 means paused, and 1 means normal speed.
+  La vitesse d'animation doit être une valeur comprise entre 0 et 1, où 0 signifie en pause et 1 signifie vitesse normale.
 
-  Consider the following:
-  - If the remaining time is very low compared to the selected time, the animation pace should be faster so the user knows when time is up.
-  - If the remaining time is high, the animation pace should be normal, or slightly slower.
+  Considérez ce qui suit :
+  - Si le temps restant est très faible par rapport au temps sélectionné, la vitesse d'animation doit être plus rapide pour que l'utilisateur sache quand le temps est écoulé.
+  - Si le temps restant est élevé, la vitesse d'animation doit être normale ou légèrement plus lente.
 
-  Selected Time: {{selectedTime}} seconds
-  Remaining Time: {{remainingTime}} seconds
+  Temps sélectionné : {{selectedTime}} secondes
+  Temps restant : {{remainingTime}} secondes
 
-  Reasoning:`,
+  Raisonnement :`,
 });
 
 const adjustAnimationPaceFlow = ai.defineFlow(

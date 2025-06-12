@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'ChronoZen',
-  description: 'Modern chronometer with preset times.',
+  description: 'Chronomètre moderne avec temps prédéfinis.',
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="fr" className={inter.variable}>
       <head>
         {/* Google Fonts link is managed by next/font, no manual <link> needed for Inter */}
       </head>

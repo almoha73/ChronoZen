@@ -65,7 +65,7 @@ const ChronoZenApp: React.FC = () => {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(200);
       }
-      toast({ title: "ChronoZen", description: "Time's up!" });
+      toast({ title: "ChronoZen", description: "C'est terminé !" });
       fetchAnimationPace(); // Update pace for idle state
     } else {
       clearInterval(timerIntervalRef.current);
@@ -109,12 +109,20 @@ const ChronoZenApp: React.FC = () => {
   
   const progressPercentage = initialTime > 0 ? ((initialTime - currentTime) / initialTime) * 100 : 0;
 
+  const getAriaLabelForControl = () => {
+    if (timerState === 'running') return 'Mettre en pause';
+    if (timerState === 'idle' && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
+      return 'Réinitialiser';
+    }
+    return 'Démarrer';
+  };
+
   return (
     <Card className="w-full max-w-md p-4 md:p-8 shadow-2xl rounded-xl bg-card animate-fade-in">
       <CardContent className="flex flex-col items-center justify-center space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-headline font-bold text-primary">ChronoZen</h1>
-          <p className="text-muted-foreground">Focus. Breathe. Achieve.</p>
+          <p className="text-muted-foreground">Concentrez-vous. Respirez. Réussissez.</p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2">
@@ -144,7 +152,7 @@ const ChronoZenApp: React.FC = () => {
         <Button
           onClick={handleControlClick}
           className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
-          aria-label={timerState === 'running' ? 'Pause timer' : (timerState === 'idle' && (currentTime === 0 || currentTime < initialTime) && initialTime > 0) ? 'Reset timer' : 'Start timer'}
+          aria-label={getAriaLabelForControl()}
         >
           {getControlIcon()}
         </Button>
