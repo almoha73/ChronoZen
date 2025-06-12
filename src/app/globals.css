@@ -5,6 +5,54 @@
 
 @layer base {
   :root {
+    --background: 210 29% 95%; /* Light Gray #F0F4F8 */
+    --foreground: 210 10% 23%; /* Dark Gray for text on light background */
+
+    --card: 210 29% 95%; /* Light Gray */
+    --card-foreground: 210 10% 23%; /* Dark Gray */
+
+    --popover: 210 29% 95%; /* Light Gray */
+    --popover-foreground: 210 10% 23%; /* Dark Gray */
+
+    --primary: 197 78% 52%; /* Saturated Blue #29ABE2 */
+    --primary-foreground: 210 29% 98%; /* Very Light Gray/White for text on primary */
+
+    --secondary: 210 15% 88%; /* Lighter gray for secondary elements */
+    --secondary-foreground: 197 78% 45%; /* Darker Saturated Blue for text on secondary */
+
+    --muted: 210 15% 88%; /* Lighter gray */
+    --muted-foreground: 210 10% 45%; /* Medium Gray for muted text */
+
+    --accent: 30 100% 60%; /* Warm Orange #FF9933 */
+    --accent-foreground: 210 10% 23%; /* Dark Gray for text on accent */
+
+    --destructive: 0 84% 60%; /* Standard bright red */
+    --destructive-foreground: 0 0% 98%; /* Light text for destructive */
+
+    --border: 210 20% 88%; /* Slightly darker than background for borders */
+    --input: 210 20% 88%;
+    --ring: 197 78% 52%; /* Saturated Blue for rings (focus states) */
+
+    --chart-1: 197 78% 52%; /* Saturated Blue */
+    --chart-2: 30 100% 60%;  /* Warm Orange */
+    --chart-3: 210 10% 45%;  /* Medium Gray */
+    --chart-4: 197 60% 70%; /* Lighter Saturated Blue */
+    --chart-5: 30 80% 75%;  /* Lighter Warm Orange */
+
+    --radius: 0.5rem;
+
+    /* Sidebar variables for light theme (can be adjusted as needed) */
+    --sidebar-background: 210 25% 92%; /* Slightly different light gray */
+    --sidebar-foreground: 210 10% 23%;
+    --sidebar-primary: 197 78% 48%; /* Slightly darker primary for sidebar */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 30 100% 55%; /* Slightly darker accent for sidebar */
+    --sidebar-accent-foreground: 210 10% 23%;
+    --sidebar-border: 210 20% 85%;
+    --sidebar-ring: 197 78% 48%;
+  }
+
+  .dark {
     --background: 275 30% 15%; /* Dark Purple */
     --foreground: 50 40% 92%; /* Light Yellowish Cream */
 
@@ -39,8 +87,6 @@
     --chart-4: 280 50% 70%; /* Lighter Vibrant Purple */
     --chart-5: 70 25% 65%;  /* Lighter Muted Gold/Olive */
 
-    --radius: 0.5rem;
-
     --sidebar-background: 275 30% 18%; /* Slightly lighter than main background */
     --sidebar-foreground: 50 40% 92%;
     --sidebar-primary: 280 65% 62%; /* Brighter purple for sidebar primary */
@@ -48,51 +94,6 @@
     --sidebar-accent: 70 30% 50%; /* Brighter gold for sidebar accent */
     --sidebar-accent-foreground: 50 40% 92%;
     --sidebar-border: 275 25% 28%; /* Slightly lighter border */
-    --sidebar-ring: 280 65% 62%;
-  }
-
-  .dark {
-    --background: 275 30% 15%;
-    --foreground: 50 40% 92%;
-
-    --card: 275 30% 15%;
-    --card-foreground: 50 40% 92%;
-
-    --popover: 275 30% 15%;
-    --popover-foreground: 50 40% 92%;
-
-    --primary: 280 65% 58%;
-    --primary-foreground: 50 40% 92%;
-
-    --secondary: 70 30% 45%;
-    --secondary-foreground: 50 40% 92%;
-
-    --muted: 70 30% 45%;
-    --muted-foreground: 70 25% 65%;
-
-    --accent: 280 65% 58%;
-    --accent-foreground: 50 40% 92%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 275 25% 25%;
-    --input: 275 25% 25%;
-    --ring: 280 65% 58%;
-
-    --chart-1: 280 65% 58%;
-    --chart-2: 70 30% 45%;
-    --chart-3: 50 40% 92%;
-    --chart-4: 280 50% 70%;
-    --chart-5: 70 25% 65%;
-
-    --sidebar-background: 275 30% 18%;
-    --sidebar-foreground: 50 40% 92%;
-    --sidebar-primary: 280 65% 62%;
-    --sidebar-primary-foreground: 50 40% 92%;
-    --sidebar-accent: 70 30% 50%;
-    --sidebar-accent-foreground: 50 40% 92%;
-    --sidebar-border: 275 25% 28%;
     --sidebar-ring: 280 65% 62%;
   }
 }
