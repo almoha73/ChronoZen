@@ -102,9 +102,7 @@ const ChronoZenApp: React.FC = () => {
   };
 
   const handleControlClick = () => {
-    const isResetAction = timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0));
-
-    if (isResetAction) {
+    if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
       setCurrentTime(initialTime);
       setTimerState("idle"); 
     } else if (timerState === "running") { 
