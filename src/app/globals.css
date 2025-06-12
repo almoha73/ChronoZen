@@ -5,51 +5,51 @@
 
 @layer base {
   :root {
-    --background: 210 29% 95%; /* Light Gray #F0F4F8 */
-    --foreground: 210 10% 23%; /* Dark Gray for text on light background */
+    --background: 50 40% 95%; /* Very Light Yellowish Cream */
+    --foreground: 275 30% 20%; /* Dark Purple for text */
 
-    --card: 210 29% 95%; /* Light Gray */
-    --card-foreground: 210 10% 23%; /* Dark Gray */
+    --card: 50 40% 95%; /* Very Light Yellowish Cream */
+    --card-foreground: 275 30% 20%; /* Dark Purple */
 
-    --popover: 210 29% 95%; /* Light Gray */
-    --popover-foreground: 210 10% 23%; /* Dark Gray */
+    --popover: 50 40% 95%; /* Very Light Yellowish Cream */
+    --popover-foreground: 275 30% 20%; /* Dark Purple */
 
-    --primary: 197 78% 52%; /* Saturated Blue #29ABE2 */
-    --primary-foreground: 210 29% 98%; /* Very Light Gray/White for text on primary */
+    --primary: 280 65% 58%; /* Vibrant Purple */
+    --primary-foreground: 50 40% 98%; /* Very Light Cream for text on primary */
 
-    --secondary: 210 15% 88%; /* Lighter gray for secondary elements */
-    --secondary-foreground: 197 78% 45%; /* Darker Saturated Blue for text on secondary */
+    --secondary: 70 30% 88%; /* Lighter Muted Gold/Olive for secondary elements */
+    --secondary-foreground: 70 30% 35%; /* Darker Gold/Olive for text on secondary */
 
-    --muted: 210 15% 88%; /* Lighter gray */
-    --muted-foreground: 210 10% 45%; /* Medium Gray for muted text */
+    --muted: 70 30% 92%; /* Even Lighter Muted Gold/Olive */
+    --muted-foreground: 275 25% 50%; /* Medium Dark Purple for muted text */
 
-    --accent: 30 100% 60%; /* Warm Orange #FF9933 */
-    --accent-foreground: 210 10% 23%; /* Dark Gray for text on accent */
+    --accent: 70 35% 55%; /* Muted Gold/Olive as accent */
+    --accent-foreground: 275 30% 15%; /* Dark purple text on gold accent */
 
     --destructive: 0 84% 60%; /* Standard bright red */
     --destructive-foreground: 0 0% 98%; /* Light text for destructive */
 
-    --border: 210 20% 88%; /* Slightly darker than background for borders */
-    --input: 210 20% 88%;
-    --ring: 197 78% 52%; /* Saturated Blue for rings (focus states) */
+    --border: 275 25% 85%; /* Light Purple/Gray for borders */
+    --input: 275 25% 85%;
+    --ring: 280 65% 58%; /* Vibrant Purple for rings (focus states) */
 
-    --chart-1: 197 78% 52%; /* Saturated Blue */
-    --chart-2: 30 100% 60%;  /* Warm Orange */
-    --chart-3: 210 10% 45%;  /* Medium Gray */
-    --chart-4: 197 60% 70%; /* Lighter Saturated Blue */
-    --chart-5: 30 80% 75%;  /* Lighter Warm Orange */
+    --chart-1: 280 65% 58%; /* Vibrant Purple */
+    --chart-2: 70 35% 55%;  /* Muted Gold/Olive */
+    --chart-3: 275 30% 40%;  /* Medium Dark Purple */
+    --chart-4: 280 50% 70%; /* Lighter Vibrant Purple */
+    --chart-5: 70 30% 70%;  /* Lighter Muted Gold/Olive */
 
     --radius: 0.5rem;
 
-    /* Sidebar variables for light theme (can be adjusted as needed) */
-    --sidebar-background: 210 25% 92%; /* Slightly different light gray */
-    --sidebar-foreground: 210 10% 23%;
-    --sidebar-primary: 197 78% 48%; /* Slightly darker primary for sidebar */
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 30 100% 55%; /* Slightly darker accent for sidebar */
-    --sidebar-accent-foreground: 210 10% 23%;
-    --sidebar-border: 210 20% 85%;
-    --sidebar-ring: 197 78% 48%;
+    /* Sidebar variables for light theme (purple/gold palette) */
+    --sidebar-background: 50 40% 92%; /* Slightly darker light cream */
+    --sidebar-foreground: 275 30% 20%; /* Dark Purple */
+    --sidebar-primary: 280 65% 55%; /* Slightly desaturated/darker Vibrant Purple */
+    --sidebar-primary-foreground: 50 40% 98%; /* Very Light Cream */
+    --sidebar-accent: 70 35% 50%; /* Slightly darker Muted Gold/Olive */
+    --sidebar-accent-foreground: 275 30% 15%; /* Dark Purple */
+    --sidebar-border: 275 25% 82%; /* Lighter Purple/Gray */
+    --sidebar-ring: 280 65% 55%; /* Vibrant Purple for rings */
   }
 
   .dark {
@@ -87,6 +87,7 @@
     --chart-4: 280 50% 70%; /* Lighter Vibrant Purple */
     --chart-5: 70 25% 65%;  /* Lighter Muted Gold/Olive */
 
+    /* Sidebar variables for dark theme (purple/gold palette) */
     --sidebar-background: 275 30% 18%; /* Slightly lighter than main background */
     --sidebar-foreground: 50 40% 92%;
     --sidebar-primary: 280 65% 62%; /* Brighter purple for sidebar primary */
