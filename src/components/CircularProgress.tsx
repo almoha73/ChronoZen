@@ -31,10 +31,10 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   const effectiveAnimationPace = Math.max(0.1, Math.min(2, animationPace)); // Pace between 0.1x and 2x of base
   const transitionDurationValue = (BASE_CLIENT_TRANSITION_SECONDS / effectiveAnimationPace).toFixed(2);
   const transitionDuration = `${transitionDurationValue}s`;
-  
+
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90 absolute">
+    <div className="relative flex items-center justify-center w-full aspect-square max-w-[200px] sm:max-w-[240px] md:max-w-[260px] mx-auto">
+      <svg viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90 absolute w-full h-full">
         <circle
           className={trackColorClass}
           strokeWidth={strokeWidth}

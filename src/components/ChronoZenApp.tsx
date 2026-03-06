@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import TimerDisplay from './TimerDisplay';
 import CircularProgress from './CircularProgress';
 import { useToast } from "@/hooks/use-toast";
-import { adjustAnimationPace, type AdjustAnimationPaceInput } from '@/ai/flows/smart-animation-pacing';
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -32,30 +32,15 @@ const ChronoZenApp: React.FC = () => {
   const [customMinutes, setCustomMinutes] = useState<string>("");
   const { toast } = useToast();
   const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
-  const lastAiCallTimeRef = useRef<number>(0);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const fetchAnimationPace = useCallback(async () => {
-    if (initialTime <= 0) return;
-    if (Date.now() - lastAiCallTimeRef.current < 5000 && timerState === 'running') return;
 
-    lastAiCallTimeRef.current = Date.now();
-    try {
-      const input: AdjustAnimationPaceInput = {
-        selectedTime: initialTime,
-        remainingTime: currentTime,
-      };
-      const result = await adjustAnimationPace(input);
-      setAnimationPace(result.animationPace);
-    } catch (error) {
-      console.error("Erreur lors de la récupération du rythme d'animation:", error);
-      setAnimationPace(1);
-    }
-  }, [initialTime, currentTime, timerState]);
 
   useEffect(() => {
     if (timerState === "running" && currentTime > 0) {
-      fetchAnimationPace();
+      // Calculate pace mathematically without AI, e.g., speed up slightly at the end
+      setAnimationPace(currentTime < initialTime * 0.1 ? 1.5 : 1);
       timerIntervalRef.current = setInterval(() => {
         setCurrentTime((prevTime) => Math.max(0, prevTime - 1));
       }, 1000);
@@ -67,22 +52,19 @@ const ChronoZenApp: React.FC = () => {
       audioRef.current?.play().catch(e => console.error("Erreur lors de la lecture du son:", e));
       toast({ title: "ChronoZen", description: "C'est terminé !" });
       setTimerState("idle");
-      fetchAnimationPace(); 
-    } else { 
+      setAnimationPace(1);
+    } else {
       clearInterval(timerIntervalRef.current);
-      if (timerState !== 'running' && initialTime > 0) {
-        fetchAnimationPace();
-      }
     }
     return () => clearInterval(timerIntervalRef.current);
-  }, [timerState, currentTime, initialTime, toast, fetchAnimationPace]);
+  }, [timerState, currentTime, initialTime, toast]);
 
 
   const handlePresetSelect = (seconds: number) => {
     setInitialTime(seconds);
     setCurrentTime(seconds);
     setTimerState("idle");
-    setCustomMinutes(""); 
+    setCustomMinutes("");
   };
 
   const handleCustomTimeSet = () => {
@@ -106,25 +88,25 @@ const ChronoZenApp: React.FC = () => {
       // Condition for Reset: Timer is idle and either at 0 or stopped mid-way
       setCurrentTime(initialTime); // Reset time
       setTimerState("idle");       // Ensure state is idle (ready for Play)
-    } else if (timerState === "running") { 
+    } else if (timerState === "running") {
       // Condition for Pause: Timer is running
       setTimerState("paused");
-    } else { 
+    } else {
       // Condition for Play: Timer is idle (fresh start or after reset) or paused
       setTimerState("running");
     }
   };
 
   const getControlIcon = () => {
-    if (timerState === "running") return <Pause className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
+    if (timerState === "running") return <Pause className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary-foreground" />;
     // If timer is idle AND (it's at 0 OR it was stopped mid-way and needs reset)
     if (timerState === "idle" && (currentTime === 0 || (currentTime < initialTime && initialTime > 0))) {
-      return <RotateCcw className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
+      return <RotateCcw className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary-foreground" />;
     }
     // Default to Play (timer is idle and ready, or paused)
-    return <Play className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />;
+    return <Play className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary-foreground" />;
   };
-  
+
   const progressPercentage = initialTime > 0 ? ((initialTime - currentTime) / initialTime) * 100 : 0;
 
   const getAriaLabelForControl = () => {
@@ -136,11 +118,11 @@ const ChronoZenApp: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-md p-4 md:p-8 shadow-2xl rounded-xl bg-card animate-fade-in">
-      <CardContent className="flex flex-col items-center justify-center space-y-6 md:space-y-8">
+    <Card className="w-full max-w-xl h-full flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-2xl bg-card/60 dark:bg-card/40 border border-white/20 dark:border-white/10 rounded-[2rem] animate-fade-in relative z-10">
+      <CardContent className="flex-1 min-h-0 flex flex-col items-center justify-evenly p-2 sm:p-4 md:p-6">
         <audio ref={audioRef} src="/notification.mp3" preload="auto"></audio>
         <div className="text-center">
-          <h1 className="text-4xl font-headline font-bold text-primary">ChronoZen Minuteur</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-sm mb-1 sm:mb-2">ChronoZen</h1>
           <p className="text-muted-foreground">Choisissez un préréglage ou définissez votre propre durée.</p>
         </div>
 
@@ -150,7 +132,7 @@ const ChronoZenApp: React.FC = () => {
               key={preset.label}
               variant={initialTime === preset.seconds && timerState === 'idle' && customMinutes === "" ? "default" : "outline"}
               onClick={() => handlePresetSelect(preset.seconds)}
-              className="active:scale-95 transition-transform text-sm md:text-base px-3 py-1.5 h-auto md:px-4 md:py-2 bg-accent hover:bg-accent/90 text-accent-foreground border-accent hover:border-accent/90 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="active:scale-95 transition-transform text-sm md:text-base px-3 py-1.5 h-auto md:px-4 md:py-2 bg-secondary/50 backdrop-blur-md hover:bg-secondary/80 text-secondary-foreground border border-white/10 dark:border-white/5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-sm rounded-xl"
             >
               {preset.label}
             </Button>
@@ -169,22 +151,22 @@ const ChronoZenApp: React.FC = () => {
               value={customMinutes}
               onChange={(e) => setCustomMinutes(e.target.value)}
               placeholder="Ex: 45"
-              className="h-10 text-sm w-full"
+              className="h-11 text-sm w-full bg-background/50 border-white/20 dark:border-white/10 backdrop-blur-sm rounded-xl"
               aria-label="Durée personnalisée en minutes"
             />
             <Button
               onClick={handleCustomTimeSet}
               disabled={!customMinutes}
-              className="h-10 px-4 active:scale-95 transition-transform"
+              className="h-11 px-4 active:scale-95 transition-transform rounded-xl bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90"
               aria-label="Définir la durée personnalisée"
             >
               <TimerIcon className="mr-2 h-4 w-4" /> Définir
             </Button>
           </div>
         </div>
-        
-        <CircularProgress 
-          percentage={progressPercentage} 
+
+        <CircularProgress
+          percentage={progressPercentage}
           animationPace={animationPace}
           colorClass="stroke-primary"
           trackColorClass="stroke-border/50"
@@ -196,9 +178,9 @@ const ChronoZenApp: React.FC = () => {
 
         <Button
           onClick={handleControlClick}
-          className="w-20 h-20 md:w-24 md:h-24 rounded-full p-0 shadow-lg active:scale-95 transition-transform bg-primary hover:bg-primary/90"
+          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full p-0 shadow-xl active:scale-95 transition-all bg-gradient-to-br from-primary to-accent hover:opacity-90 border border-white/20 flex-shrink-0"
           aria-label={getAriaLabelForControl()}
-          disabled={initialTime <= 0 && currentTime < 0 } 
+          disabled={initialTime <= 0 && currentTime < 0}
         >
           {getControlIcon()}
         </Button>

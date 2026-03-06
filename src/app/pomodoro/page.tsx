@@ -2,8 +2,8 @@ import PomodoroController from '@/components/PomodoroController';
 
 export default function PomodoroPage() {
   return (
-    <main className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center bg-background p-4 selection:bg-accent selection:text-accent-foreground">
-      {/* 64px is approx height of nav, adjust if needed */}
+    <main className="flex-1 min-h-0 w-full flex flex-col items-center justify-center p-2 sm:p-4">
+      {/* Takes remaining height from flex col layout without scrolling */}
       <PomodoroController />
     </main>
   );
